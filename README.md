@@ -70,13 +70,30 @@ By default, the system uses the `OPENAI_API_KEY` environment variable for OpenAI
 
 By default, the system uses the `GEMINI_API_KEY` environment variable for Gemini models through OpenAI API.
 
-#### Claude Models via AWS Bedrock
+#### Claude (Native Anthropic API) with optional Custom Base
 
-To use Claude models provided by Amazon Bedrock, install the necessary additional packages:
+This project uses the native Anthropic Claude Messages API. You can also route requests through a custom reverse proxy or gateway by providing a custom base URL.
+
+Environment variables:
+
 ```bash
-pip install anthropic[bedrock]
+export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_KEY"
+# Optional: use a custom base URL (reverse proxy or gateway compatible with Anthropic SDK)
+export CLAUDE_API_BASE="https://your-proxy.example.com"
 ```
-Next, configure valid [AWS Credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html) and the target [AWS Region](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-regions.html) by setting the following environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION_NAME`.
+
+Supported native Claude model IDs include (non-exhaustive):
+
+```
+claude-3-5-sonnet-20240620
+claude-3-5-sonnet-20241022
+claude-3-sonnet-20240229
+claude-3-haiku-20240307
+claude-3-opus-20240229
+claude-opus-4-0
+claude-sonnet-4-0
+claude-3-7-sonnet-latest
+```
 
 #### Semantic Scholar API (Literature Search)
 
@@ -88,10 +105,10 @@ Ensure you provide the necessary API keys as environment variables for the model
 ```bash
 export OPENAI_API_KEY="YOUR_OPENAI_KEY_HERE"
 export S2_API_KEY="YOUR_S2_KEY_HERE"
-# Set AWS credentials if using Bedrock
-# export AWS_ACCESS_KEY_ID="YOUR_AWS_ACCESS_KEY_ID"
-# export AWS_SECRET_ACCESS_KEY="YOUR_AWS_SECRET_KEY"
-# export AWS_REGION_NAME="your-aws-region"
+# For Anthropic Claude (native)
+export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_KEY"
+# Optional custom base URL for Claude
+# export CLAUDE_API_BASE="https://your-proxy.example.com"
 ```
 
 ## Generate Research Ideas
@@ -200,3 +217,966 @@ The tree search component implemented within the `ai_scientist` directory is bui
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SakanaAI/AI-Scientist-v2&type=Date)](https://star-history.com/#SakanaAI/AI-Scientist-v2&Date)
 
+帮我把以下信息做成一个配置文件，使该项目能够加载，类似于node技术栈中dot-env和.env文件的形式
+openai 协议: https//api.openai-proxy.org/v1
+  - 支持openai所有模型
+  - 支持deepseek模型
+anthropic apibase： https://api.openai-proxy.org/anthropic
+  - 支持anthropic所有模型
+gemini协议：https://api.openai-proxy.org/google
+  - 支持gemini所有模型
+秘钥 sk-9tbQSdt1iL0rJW31DFS3rMKxH8NUIBUwE4cC2OkF7tCVNoqB
+
+并把以下模型列表整理成一个markdown，然后看看这些模型的选择怎么集成到项目中（我记得gpt5和以前gpt模型的接口不一样了，需要重新适配）
+具体模型列表
+模型	类型	模型限流	
+定价(美元)
+gpt-5-2025-08-07 最新上线	chat	500 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gpt-5-chat-latest 最新上线	chat	500 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gpt-5-mini 最新上线	chat	1000 RPM	
+输入价格: 
+$0.25
+×1.5
+/ M Tokens
+输出价格: 
+$2
+×1.5
+/ M Tokens
+gpt-5-mini-2025-08-07 最新上线	chat	1000 RPM	
+输入价格: 
+$0.25
+×1.5
+/ M Tokens
+输出价格: 
+$2
+×1.5
+/ M Tokens
+gpt-5-nano 最新上线	chat	1000 RPM	
+输入价格: 
+$0.05
+×1.5
+/ M Tokens
+输出价格: 
+$0.4
+×1.5
+/ M Tokens
+gpt-5-nano-2025-08-07 最新上线	chat	1000 RPM	
+输入价格: 
+$0.05
+×1.5
+/ M Tokens
+输出价格: 
+$0.4
+×1.5
+/ M Tokens
+gpt-5 最新上线	chat	500 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+o4-mini-deep-research-2025-06-26 最新上线	chat	1000 RPM	
+输入价格: 
+$2
+×1.5
+/ M Tokens
+输出价格: 
+$8
+×1.5
+/ M Tokens
+o4-mini-deep-research 最新上线	chat	1000 RPM	
+输入价格: 
+$2
+×1.5
+/ M Tokens
+输出价格: 
+$8
+×1.5
+/ M Tokens
+o3-deep-research-2025-06-26 最新上线	chat	500 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$40
+×1.5
+/ M Tokens
+o3-deep-research 最新上线	chat	500 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$40
+×1.5
+/ M Tokens
+o3-pro-2025-06-10	chat	500 RPM	
+输入价格: 
+$20
+×1.5
+/ M Tokens
+输出价格: 
+$80
+×1.5
+/ M Tokens
+o3-pro	chat	500 RPM	
+输入价格: 
+$20
+×1.5
+/ M Tokens
+输出价格: 
+$80
+×1.5
+/ M Tokens
+gpt-4o-audio-preview-2025-06-03	chat	100 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+o4-mini-2025-04-16	chat	1000 RPM	
+输入价格: 
+$1.1
+×1.5
+/ M Tokens
+输出价格: 
+$4.4
+×1.5
+/ M Tokens
+o4-mini	chat	1000 RPM	
+输入价格: 
+$1.1
+×1.5
+/ M Tokens
+输出价格: 
+$4.4
+×1.5
+/ M Tokens
+o3-2025-04-16	chat	500 RPM	
+输入价格: 
+$2
+×1.5
+/ M Tokens
+输出价格: 
+$8
+×1.5
+/ M Tokens
+o3	chat	500 RPM	
+输入价格: 
+$2
+×1.5
+/ M Tokens
+输出价格: 
+$8
+×1.5
+/ M Tokens
+gpt-4.1-nano-2025-04-14	chat	1000 RPM	
+输入价格: 
+$0.1
+×1.5
+/ M Tokens
+输出价格: 
+$0.4
+×1.5
+/ M Tokens
+gpt-4.1-nano	chat	1000 RPM	
+输入价格: 
+$0.1
+×1.5
+/ M Tokens
+输出价格: 
+$0.4
+×1.5
+/ M Tokens
+gpt-4.1-mini-2025-04-14	chat	1000 RPM	
+输入价格: 
+$0.4
+×1.5
+/ M Tokens
+输出价格: 
+$1.6
+×1.5
+/ M Tokens
+gpt-4.1-mini	chat	1000 RPM	
+输入价格: 
+$0.4
+×1.5
+/ M Tokens
+输出价格: 
+$1.6
+×1.5
+/ M Tokens
+gpt-4.1-2025-04-14	chat	1000 RPM	
+输入价格: 
+$2
+×1.5
+/ M Tokens
+输出价格: 
+$8
+×1.5
+/ M Tokens
+gpt-4.1	chat	1000 RPM	
+输入价格: 
+$2
+×1.5
+/ M Tokens
+输出价格: 
+$8
+×1.5
+/ M Tokens
+gpt-4o-mini-search-preview	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$0.6
+×1.5
+/ M Tokens
+gpt-4o-mini-search-preview-2025-03-11	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$0.6
+×1.5
+/ M Tokens
+gpt-4o-search-preview	chat	200 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gpt-4o-search-preview-2025-03-11	chat	200 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+computer-use-preview	chat	200 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$12
+×1.5
+/ M Tokens
+computer-use-preview-2025-03-11	chat	200 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$12
+×1.5
+/ M Tokens
+o1-pro	chat	200 RPM	
+输入价格: 
+$150
+×1.5
+/ M Tokens
+输出价格: 
+$600
+×1.5
+/ M Tokens
+o1-pro-2025-03-19	chat	200 RPM	
+输入价格: 
+$150
+×1.5
+/ M Tokens
+输出价格: 
+$600
+×1.5
+/ M Tokens
+gpt-4.5-preview	chat	100 RPM	
+输入价格: 
+$75
+×1.5
+/ M Tokens
+输出价格: 
+$150
+×1.5
+/ M Tokens
+gpt-4.5-preview-2025-02-27	chat	100 RPM	
+输入价格: 
+$75
+×1.5
+/ M Tokens
+输出价格: 
+$150
+×1.5
+/ M Tokens
+o3-mini	chat	1000 RPM	
+输入价格: 
+$1.1
+×1.5
+/ M Tokens
+输出价格: 
+$4.4
+×1.5
+/ M Tokens
+o3-mini-2025-01-31	chat	1000 RPM	
+输入价格: 
+$1.1
+×1.5
+/ M Tokens
+输出价格: 
+$4.4
+×1.5
+/ M Tokens
+gpt-4o-mini-audio-preview-2024-12-17	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$0.6
+×1.5
+/ M Tokens
+gpt-4o-mini-audio-preview	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$0.6
+×1.5
+/ M Tokens
+gpt-4o-audio-preview-2024-12-17	chat	100 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+o1	chat	500 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$60
+×1.5
+/ M Tokens
+o1-2024-12-17	chat	500 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$60
+×1.5
+/ M Tokens
+gpt-4o-2024-11-20	chat	500 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gpt-4o-audio-preview	chat	100 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gpt-4o-audio-preview-2024-10-01	chat	100 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+o1-mini	chat	1000 RPM	
+输入价格: 
+$1.1
+×1.5
+/ M Tokens
+输出价格: 
+$4.4
+×1.5
+/ M Tokens
+o1-mini-2024-09-12	chat	1000 RPM	
+输入价格: 
+$1.1
+×1.5
+/ M Tokens
+输出价格: 
+$4.4
+×1.5
+/ M Tokens
+o1-preview	chat	500 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$60
+×1.5
+/ M Tokens
+o1-preview-2024-09-12	chat	500 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$60
+×1.5
+/ M Tokens
+chatgpt-4o-latest	chat	500 RPM	
+输入价格: 
+$5
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+gpt-4o-2024-08-06	chat	500 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gpt-4o-mini	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$0.6
+×1.5
+/ M Tokens
+gpt-4o-mini-2024-07-18	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$0.6
+×1.5
+/ M Tokens
+gpt-4o-2024-05-13	chat	500 RPM	
+输入价格: 
+$5
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+gpt-4o	chat	500 RPM	
+输入价格: 
+$2.5
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gpt-4-turbo	chat	500 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$30
+×1.5
+/ M Tokens
+gpt-4-turbo-2024-04-09	chat	500 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$30
+×1.5
+/ M Tokens
+gpt-4-0125-preview	chat	500 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$30
+×1.5
+/ M Tokens
+gpt-4-1106-preview	chat	500 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$30
+×1.5
+/ M Tokens
+gpt-4-1106-vision-preview	chat	200 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$30
+×1.5
+/ M Tokens
+gpt-4-turbo-preview	chat	500 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$30
+×1.5
+/ M Tokens
+gpt-4-vision-preview	chat	200 RPM	
+输入价格: 
+$10
+×1.5
+/ M Tokens
+输出价格: 
+$30
+×1.5
+/ M Tokens
+gpt-4-32k	chat	200 RPM	
+输入价格: 
+$60
+×1.5
+/ M Tokens
+输出价格: 
+$120
+×1.5
+/ M Tokens
+gpt-4-32k-0314	chat	200 RPM	
+输入价格: 
+$60
+×1.5
+/ M Tokens
+输出价格: 
+$120
+×1.5
+/ M Tokens
+gpt-4-32k-0613	chat	200 RPM	
+输入价格: 
+$60
+×1.5
+/ M Tokens
+输出价格: 
+$120
+×1.5
+/ M Tokens
+gpt-4	chat	500 RPM	
+输入价格: 
+$30
+×1.5
+/ M Tokens
+输出价格: 
+$60
+×1.5
+/ M Tokens
+gpt-4-0314	chat	500 RPM	
+输入价格: 
+$30
+×1.5
+/ M Tokens
+输出价格: 
+$60
+×1.5
+/ M Tokens
+gpt-4-0613	chat	500 RPM	
+输入价格: 
+$30
+×1.5
+/ M Tokens
+输出价格: 
+$60
+×1.5
+/ M Tokens
+gpt-3.5-turbo	chat	1000 RPM	
+输入价格: 
+$0.5
+×1.5
+/ M Tokens
+输出价格: 
+$1.5
+×1.5
+/ M Tokens
+gpt-3.5-turbo-0125	chat	1000 RPM	
+输入价格: 
+$0.5
+×1.5
+/ M Tokens
+输出价格: 
+$1.5
+×1.5
+/ M Tokens
+gpt-3.5-turbo-0301 已废弃	chat	1000 RPM	
+输入价格: 
+$1.5
+×1.5
+/ M Tokens
+输出价格: 
+$2
+×1.5
+/ M Tokens
+gpt-3.5-turbo-0613 已废弃	chat	1000 RPM	
+输入价格: 
+$1.5
+×1.5
+/ M Tokens
+输出价格: 
+$2
+×1.5
+/ M Tokens
+gpt-3.5-turbo-1106	chat	1000 RPM	
+输入价格: 
+$1
+×1.5
+/ M Tokens
+输出价格: 
+$2
+×1.5
+/ M Tokens
+gpt-3.5-turbo-16k 已废弃	chat	1000 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$4
+×1.5
+/ M Tokens
+gpt-3.5-turbo-16k-0613 已废弃	chat	1000 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$4
+×1.5
+/ M Tokens
+
+
+模型	类型	模型限流	
+定价(美元)
+claude-opus-4-1-20250805 最新上线	chat	500 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$75
+×1.5
+/ M Tokens
+claude-opus-4-0	chat	500 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$75
+×1.5
+/ M Tokens
+claude-opus-4-20250514	chat	500 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$75
+×1.5
+/ M Tokens
+claude-sonnet-4-0	chat	500 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+claude-sonnet-4-20250514	chat	500 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+claude-3-7-sonnet-20250219	chat	500 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+claude-3-7-sonnet-latest	chat	500 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+claude-3-5-haiku-20241022	chat	1000 RPM	
+输入价格: 
+$1
+×1.5
+/ M Tokens
+输出价格: 
+$5
+×1.5
+/ M Tokens
+claude-3-5-haiku-latest	chat	1000 RPM	
+输入价格: 
+$1
+×1.5
+/ M Tokens
+输出价格: 
+$5
+×1.5
+/ M Tokens
+claude-3-5-sonnet-20241022	chat	1000 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+claude-3-5-sonnet-latest	chat	1000 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+claude-3-5-sonnet-20240620	chat	1000 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+claude-3-haiku-20240307	chat	1000 RPM	
+输入价格: 
+$0.25
+×1.5
+/ M Tokens
+输出价格: 
+$1.25
+×1.5
+/ M Tokens
+claude-3-opus-20240229	chat	1000 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$75
+×1.5
+/ M Tokens
+claude-3-opus-latest	chat	1000 RPM	
+输入价格: 
+$15
+×1.5
+/ M Tokens
+输出价格: 
+$75
+×1.5
+/ M Tokens
+claude-3-sonnet-20240229	chat	1000 RPM	
+输入价格: 
+$3
+×1.5
+/ M Tokens
+输出价格: 
+$15
+×1.5
+/ M Tokens
+
+
+
+模型	类型	模型限流	
+定价(美元)
+gemini-2.5-flash-image-preview 最新上线	chat	1000 RPM	
+输入价格: 
+$0.3
+×1.5
+/ M Tokens
+输出价格: 
+$2.5
+×1.5
+/ M Tokens
+gemini-2.5-flash	chat	1000 RPM	
+输入价格: 
+$0.3
+×1.5
+/ M Tokens
+输出价格: 
+$2.5
+×1.5
+/ M Tokens
+gemini-2.5-flash-lite	chat	1000 RPM	
+输入价格: 
+$0.1
+×1.5
+/ M Tokens
+输出价格: 
+$0.4
+×1.5
+/ M Tokens
+gemini-2.5-flash-lite-preview-06-17	chat	1000 RPM	
+输入价格: 
+$0.1
+×1.5
+/ M Tokens
+输出价格: 
+$0.4
+×1.5
+/ M Tokens
+gemini-2.5-pro	chat	1000 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gemini-2.5-pro-preview-06-05 已废弃	chat	1000 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gemini-2.0-flash-preview-image-generation	chat	1000 RPM	
+输入价格: 
+$0.1
+×1.5
+/ M Tokens
+输出价格: 
+$0.4
+×1.5
+/ M Tokens
+gemini-2.5-flash-preview-05-20	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$3.5
+×1.5
+/ M Tokens
+gemini-2.5-pro-preview-05-06	chat	1000 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gemini-2.5-flash-preview-04-17	chat	1000 RPM	
+输入价格: 
+$0.15
+×1.5
+/ M Tokens
+输出价格: 
+$3.5
+×1.5
+/ M Tokens
+gemini-2.5-pro-preview-03-25	chat	1000 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+gemini-2.5-pro-exp-03-25 已废弃	chat	1000 RPM	
+输入价格: 
+$1.25
+×1.5
+/ M Tokens
+输出价格: 
+$10
+×1.5
+/ M Tokens
+
+
+模型	类型	模型限流	
+定价(美元)
+deepseek-chat	chat	1000 RPM	
+输入价格: 
+$0.55
+×1.5
+/ M Tokens
+输出价格: 
+$1.7
+×1.5
+/ M Tokens
+deepseek-reasoner	chat	1000 RPM	
+输入价格: 
+$0.55
+×1.5
+/ M Tokens
+输出价格: 
+$1.7
+×1.5
+/ M Tokens

@@ -27,6 +27,22 @@ def query(
         OutputType: A string completion if func_spec is None, otherwise a dict with the function call details.
     """
 
+    # Map Bedrock Claude model IDs to native Anthropic IDs to ensure correct backend routing
+    def _map_bedrock_to_native(m: str) -> str:
+        if not (m.startswith("bedrock/") and "claude" in m):
+            return m
+        mapping = {
+            "anthropic.claude-3-sonnet-20240229-v1:0": "claude-3-sonnet-20240229",
+            "anthropic.claude-3-5-sonnet-20240620-v1:0": "claude-3-5-sonnet-20240620",
+            "anthropic.claude-3-5-sonnet-20241022-v2:0": "claude-3-5-sonnet-20241022",
+            "anthropic.claude-3-haiku-20240307-v1:0": "claude-3-haiku-20240307",
+            "anthropic.claude-3-opus-20240229-v1:0": "claude-3-opus-20240229",
+        }
+        key = m.split("/")[-1]
+        return mapping.get(key, key)
+
+    model = _map_bedrock_to_native(model)
+
     model_kwargs = model_kwargs | {
         "model": model,
         "temperature": temperature,

@@ -2,6 +2,7 @@
 anthropic
 backoff
 openai
+python-dotenv
 # Viz
 matplotlib
 pypdf

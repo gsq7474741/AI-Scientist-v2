@@ -164,8 +164,15 @@ def create_client(model: str) -> tuple[Any, str]:
         "gpt-4o-mini-2024-07-18",
         "o3-mini",
     ]:
+        import os
         print(f"Using OpenAI API with model {model}.")
-        return openai.OpenAI(), model
+        return (
+            openai.OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url=os.getenv("OPENAI_API_BASE"),
+            ),
+            model,
+        )
     else:
         raise ValueError(f"Model {model} not supported.")
 

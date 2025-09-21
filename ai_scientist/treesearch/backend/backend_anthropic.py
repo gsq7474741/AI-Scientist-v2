@@ -6,7 +6,7 @@ from funcy import notnone, once, select_values
 import anthropic
 
 # _client: anthropic.Anthropic = None  # type: ignore
-_client: anthropic.AnthropicBedrock = None  # type: ignore
+_client: anthropic.Anthropic | None = None  # type: ignore
 
 ANTHROPIC_TIMEOUT_EXCEPTIONS = (
     anthropic.RateLimitError,
@@ -20,8 +20,34 @@ ANTHROPIC_TIMEOUT_EXCEPTIONS = (
 @once
 def _setup_anthropic_client():
     global _client
-    # _client = anthropic.Anthropic(max_retries=0)
-    _client = anthropic.AnthropicBedrock(max_retries=0)
+    # Prefer native Anthropic client with optional custom base_url
+    # Required: ANTHROPIC_API_KEY
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+    base_url = os.getenv("CLAUDE_API_BASE")
+    # Optional tuning
+    try:
+        timeout = float(os.getenv("ANTHROPIC_TIMEOUT", "60"))  # seconds
+    except ValueError:
+        timeout = 60.0
+    try:
+        max_retries = int(os.getenv("ANTHROPIC_MAX_RETRIES", "3"))
+    except ValueError:
+        max_retries = 3
+    if base_url:
+        _client = anthropic.Anthropic(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+            max_retries=max_retries,
+        )
+    else:
+        _client = anthropic.Anthropic(
+            api_key=api_key,
+            timeout=timeout,
+            max_retries=max_retries,
+        )
 
 
 def query(

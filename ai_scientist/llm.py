@@ -11,9 +11,25 @@ import openai
 MAX_NUM_TOKENS = 4096
 
 AVAILABLE_LLMS = [
+    # Anthropic (native Claude models)
     "claude-3-5-sonnet-20240620",
     "claude-3-5-sonnet-20241022",
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307",
+    "claude-3-opus-20240229",
+    # Newly requested models
+    "claude-opus-4-0",
+    "claude-sonnet-4-0",
+    "claude-3-7-sonnet-latest",
     # OpenAI models
+    # GPT-5 family (Responses API preferred)
+    "gpt-5",
+    "gpt-5-2025-08-07",
+    "gpt-5-chat-latest",
+    "gpt-5-mini",
+    "gpt-5-mini-2025-08-07",
+    "gpt-5-nano",
+    "gpt-5-nano-2025-08-07",
     "gpt-4o-mini",
     "gpt-4o-mini-2024-07-18",
     "gpt-4o",
@@ -35,13 +51,7 @@ AVAILABLE_LLMS = [
     "deepcoder-14b",
     # Llama 3 models
     "llama3.1-405b",
-    # Anthropic Claude models via Amazon Bedrock
-    "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
-    "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
-    "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0",
-    "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
-    "bedrock/anthropic.claude-3-opus-20240229-v1:0",
-    # Anthropic Claude models Vertex AI
+    # Anthropic Claude via Vertex AI (optional)
     "vertex_ai/claude-3-opus@20240229",
     "vertex_ai/claude-3-5-sonnet@20240620",
     "vertex_ai/claude-3-5-sonnet@20241022",
@@ -79,7 +89,55 @@ def get_batch_responses_from_llm(
     if msg_history is None:
         msg_history = []
 
-    if "gpt" in model:
+    if model.startswith("gpt-5"):
+        # Prefer OpenAI Responses API; fallback to Chat Completions if not available
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        contents = []
+        new_histories = []
+        for _ in range(n_responses):
+            try:
+                # Build a compact combined input string for Responses API
+                combined = f"[SYSTEM]\n{system_message}\n\n" + "\n".join(
+                    [
+                        (f"[{m['role'].upper()}]\n{m['content']}" if isinstance(m["content"], str) else f"[{m['role'].upper()}]\n" + "\n".join(
+                            part.get("text", "") for part in m["content"] if isinstance(part, dict)
+                        ))
+                        for m in new_msg_history
+                    ]
+                )
+                resp = client.responses.create(
+                    model=model,
+                    input=combined,
+                    temperature=temperature,
+                    max_output_tokens=MAX_NUM_TOKENS,
+                )
+                text = getattr(resp, "output_text", None)
+                if not text:
+                    # Fallback parse
+                    try:
+                        text = resp.output[0].content[0].text  # type: ignore[attr-defined]
+                    except Exception:
+                        text = str(resp)
+            except Exception:
+                # Fallback to Chat Completions if Responses API not supported
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        *new_msg_history,
+                    ],
+                    temperature=temperature,
+                    max_tokens=MAX_NUM_TOKENS,
+                    n=1,
+                    stop=None,
+                    seed=0,
+                )
+                text = response.choices[0].message.content
+            contents.append(text)
+            new_histories.append(new_msg_history + [{"role": "assistant", "content": text}])
+        content = contents
+        new_msg_history = new_histories
+    elif "gpt" in model:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
             model=model,
@@ -261,6 +319,41 @@ def get_response_from_llm(
                 ],
             }
         ]
+    elif model.startswith("gpt-5"):
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        try:
+            # Build a compact combined input string for Responses API
+            combined = f"[SYSTEM]\n{system_message}\n\n" + "\n".join(
+                [
+                    (f"[{m['role'].upper()}]\n{m['content']}" if isinstance(m["content"], str) else f"[{m['role'].upper()}]\n" + "\n".join(
+                        part.get("text", "") for part in m["content"] if isinstance(part, dict)
+                    ))
+                    for m in new_msg_history
+                ]
+            )
+            response = client.responses.create(
+                model=model,
+                input=combined,
+                temperature=temperature,
+                max_output_tokens=MAX_NUM_TOKENS,
+            )
+            content = getattr(response, "output_text", None)
+            if not content:
+                try:
+                    content = response.output[0].content[0].text  # type: ignore[attr-defined]
+                except Exception:
+                    content = str(response)
+        except Exception:
+            # Fallback to Chat Completions for compatibility
+            response = make_llm_call(
+                client,
+                model,
+                temperature,
+                system_message=system_message,
+                prompt=new_msg_history,
+            )
+            content = response.choices[0].message.content
+        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     elif "gpt" in model:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = make_llm_call(
@@ -414,30 +507,67 @@ def extract_json_between_markers(llm_output: str) -> dict | None:
     return None  # No valid JSON found
 
 
+def _map_bedrock_to_native(model: str) -> str:
+    """Map Bedrock model IDs to native Anthropic model IDs."""
+    bedrock_to_native = {
+        "anthropic.claude-3-sonnet-20240229-v1:0": "claude-3-sonnet-20240229",
+        "anthropic.claude-3-5-sonnet-20240620-v1:0": "claude-3-5-sonnet-20240620",
+        "anthropic.claude-3-5-sonnet-20241022-v2:0": "claude-3-5-sonnet-20241022",
+        "anthropic.claude-3-haiku-20240307-v1:0": "claude-3-haiku-20240307",
+        "anthropic.claude-3-opus-20240229-v1:0": "claude-3-opus-20240229",
+    }
+    key = model.split("/")[-1]
+    return bedrock_to_native.get(key, key)
+
+
+def _create_anthropic_client() -> anthropic.Anthropic:
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+    base_url = os.getenv("CLAUDE_API_BASE")
+    if base_url:
+        return anthropic.Anthropic(api_key=api_key, base_url=base_url)
+    return anthropic.Anthropic(api_key=api_key)
+
+
 def create_client(model) -> tuple[Any, str]:
     if model.startswith("claude-"):
         print(f"Using Anthropic API with model {model}.")
-        return anthropic.Anthropic(), model
+        return _create_anthropic_client(), model
     elif model.startswith("bedrock") and "claude" in model:
-        client_model = model.split("/")[-1]
-        print(f"Using Amazon Bedrock with model {client_model}.")
-        return anthropic.AnthropicBedrock(), client_model
+        native_model = _map_bedrock_to_native(model)
+        print(
+            f"Deprecated model prefix 'bedrock/'. Using native Anthropic API with mapped model {native_model}."
+        )
+        return _create_anthropic_client(), native_model
     elif model.startswith("vertex_ai") and "claude" in model:
         client_model = model.split("/")[-1]
         print(f"Using Vertex AI with model {client_model}.")
         return anthropic.AnthropicVertex(), client_model
     elif "gpt" in model:
         print(f"Using OpenAI API with model {model}.")
-        return openai.OpenAI(), model
-    elif "o1" in model or "o3" in model:
-        print(f"Using OpenAI API with model {model}.")
-        return openai.OpenAI(), model
-    elif model == "deepseek-coder-v2-0724":
-        print(f"Using OpenAI API with {model}.")
         return (
             openai.OpenAI(
-                api_key=os.environ["DEEPSEEK_API_KEY"],
-                base_url="https://api.deepseek.com",
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url=os.getenv("OPENAI_API_BASE"),
+            ),
+            model,
+        )
+    elif "o1" in model or "o3" in model:
+        print(f"Using OpenAI API with model {model}.")
+        return (
+            openai.OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url=os.getenv("OPENAI_API_BASE"),
+            ),
+            model,
+        )
+    elif model == "deepseek-coder-v2-0724":
+        print(f"Using OpenAI-compatible API for {model} via OPENAI_API_BASE.")
+        return (
+            openai.OpenAI(
+                api_key=os.getenv("OPENAI_API_KEY"),
+                base_url=os.getenv("OPENAI_API_BASE"),
             ),
             model,
         )
@@ -466,8 +596,11 @@ def create_client(model) -> tuple[Any, str]:
         print(f"Using OpenAI API with {model}.")
         return (
             openai.OpenAI(
-                api_key=os.environ["GEMINI_API_KEY"],
-                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+                api_key=os.getenv("GEMINI_API_KEY"),
+                base_url=os.getenv(
+                    "GEMINI_API_BASE",
+                    "https://generativelanguage.googleapis.com/v1beta/openai/",
+                ),
             ),
             model,
         )
